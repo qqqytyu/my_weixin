@@ -2,6 +2,10 @@ from django.contrib import admin
 from lxml import etree
 from django.utils.encoding import smart_str
 import hashlib
+from wechat_sdk import WechatBasic
+from wechat_sdk.exceptions import ParseError
+from wechat_sdk.messages import TextMessage
+from wechat_sdk import WechatConf
 # Register your models here.
 
 def checkSignature(request):
@@ -24,22 +28,37 @@ def checkSignature(request):
         return False
 
 def wechat_main(request):
-    xmlstr = smart_str(request.body)
-    xml = etree.fromstring(xmlstr)
-    ToUserName = xml.find('ToUserName').text
-    FromUserName = xml.find('FromUserName').text
-    CreateTime = xml.find('CreateTime').text
-    MsgType = xml.find('MsgType').text
-    Content = xml.find('Content').text
-    MsgId = xml.find('MsgId').text
-    reply_xml = """
-           <xml>
-           <ToUserName><![CDATA[%s]]></ToUserName>
-           <FromUserName><![CDATA[geeks_at_qdu]]></FromUserName>
-           <CreateTime>12345678</CreateTime>
-           <MsgType><![CDATA[text]]></MsgType>
-           <Content><![CDATA[%s]]></Content>
-           </xml>""" % (FromUserName, Content + "  Hello world, this is test message")
-    print(ToUserName +'\n'+ FromUserName +'\n'+ CreateTime +'\n'+ MsgType +'\n'+ Content +'\n'+ MsgId)
 
-    return reply_xml.encode('utf-8')
+    conf = WechatConf(
+        token='weixin_langrensha',
+        appid='wx9068ddea25a9c0d0',
+        appsecret='242b90ea4fc787ce21345db3ce7ceae1',
+        encrypt_mode='safe',  # 可选项：normal/compatible/safe，分别对应于 明文/兼容/安全 模式
+        encoding_aes_key='qY71DJ7XdXsDWksumrazYMxf29gAKlopjOIB6n3pFV2'  # 如果传入此值则必须保证同时传入 token, appid
+    )
+
+    wechat = WechatBasic(conf=conf) #实例化 WechatBasic 官方接口类
+
+    body_text = request.body #提取body
+    try:
+        wechat.parse_data(body_text) #解析body
+    except Exception as ex:
+        print(ex)
+
+    id = wechat.message.id  # 对应于 XML 中的 MsgId
+    target = wechat.message.target  # 对应于 XML 中的 ToUserName(原)
+    source = wechat.message.source  # 对应于 XML 中的 FromUserName（目的）
+    time = wechat.message.time  # 对应于 XML 中的 CreateTime
+    type = wechat.message.type  # 对应于 XML 中的 MsgType（类型）
+    content = wechat.message.content  # 对应于 XML 中的 Content（内容）
+    raw = wechat.message.raw  # 原始 XML 文本，方便进行其他分析
+    str = '''
+    id = %s
+    target = %s
+    source = %s
+    time = %s
+    type = %s
+    content = %s
+    ''' % (id , target , source , time , type,content)
+    xml = wechat.response_text(content = str)
+    return xml

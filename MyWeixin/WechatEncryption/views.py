@@ -14,4 +14,4 @@ def index(request):
         else:
             return HttpResponse('weixin erro')
     else:
-        return HttpResponse(wechat_main(request))
+        HttpResponse(wechat_main(request))
