@@ -1,6 +1,7 @@
 from django.contrib import admin
 from lxml import etree
 from django.utils.encoding import smart_str
+import hashlib
 # Register your models here.
 
 def checkSignature(request):
@@ -16,7 +17,7 @@ def checkSignature(request):
     tmplist.sort()
     tmpstr = "%s%s%s" % tuple(tmplist)
     #对字符串进行sha1加密
-    tmpstr = hashlib.sha1(tmpstr).hexdigest()
+    tmpstr = hashlib.sha1(tmpstr.encode('utf-8')).hexdigest()
     if(tmpstr == signature):
         return True
     else:
