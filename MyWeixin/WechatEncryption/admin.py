@@ -40,3 +40,5 @@ def wechat_main(request):
            <Content><![CDATA[%s]]></Content>
            </xml>""" % (FromUserName, Content + "  Hello world, this is test message")
     print(ToUserName +'\n'+ FromUserName +'\n'+ CreateTime +'\n'+ MsgType +'\n'+ Content +'\n'+ MsgId)
+
+    return reply_xml.encode('utf-8')

@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from WechatEncryption.admin import checkSignature
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt , wechat_main
 import hashlib
 
 # Create your views here.
@@ -14,4 +14,4 @@ def index(request):
         else:
             return HttpResponse('weixin erro')
     else:
-        return HttpResponse('Hello World')
+        return HttpResponse(wechat_main(request))
