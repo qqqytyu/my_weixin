@@ -8,40 +8,43 @@ from wechat_sdk.messages import TextMessage
 from wechat_sdk import WechatConf
 # Register your models here.
 
-def checkSignature(request):
-    #获取signature timestamp nonce echostr 参数
+def checkSignature(request , wechat):
+    # #获取signature timestamp nonce echostr 参数
+    # signature = request.GET.get('signature', None)
+    # timestamp = request.GET.get('timestamp', None)
+    # nonce = request.GET.get('nonce', None)
+    # echostr = request.GET.get('echostr', None)
+    # #定义token参数
+    # token = 'weixin_langrensha'
+    # #生成token timestamp nonce 字符串
+    # tmplist = [token, timestamp, nonce]
+    # tmplist.sort()
+    # tmpstr = "%s%s%s" % tuple(tmplist)
+    # #对字符串进行sha1加密
+    # tmpstr = hashlib.sha1(tmpstr.encode('utf-8')).hexdigest()
+    # if(tmpstr == signature):
+    #     return True
+    # else:
+    #     return False
+
     signature = request.GET.get('signature', None)
     timestamp = request.GET.get('timestamp', None)
     nonce = request.GET.get('nonce', None)
-    echostr = request.GET.get('echostr', None)
-    #定义token参数
-    token = 'weixin_langrensha'
-    #生成token timestamp nonce 字符串
-    tmplist = [token, timestamp, nonce]
-    tmplist.sort()
-    tmpstr = "%s%s%s" % tuple(tmplist)
-    #对字符串进行sha1加密
-    tmpstr = hashlib.sha1(tmpstr.encode('utf-8')).hexdigest()
-    if(tmpstr == signature):
-        return True
-    else:
+
+    if not wechat.check_signature(signature=signature, timestamp=timestamp, nonce=nonce):
         return False
+    else:
+        return True
 
-def wechat_main(request):
-
-    conf = WechatConf(
-        token='weixin_langrensha',
-        appid='wx9068ddea25a9c0d0',
-        appsecret='242b90ea4fc787ce21345db3ce7ceae1',
-        encrypt_mode='safe',  # 可选项：normal/compatible/safe，分别对应于 明文/兼容/安全 模式
-        encoding_aes_key='qY71DJ7XdXsDWksumrazYMxf29gAKlopjOIB6n3pFV2'  # 如果传入此值则必须保证同时传入 token, appid
-    )
-
-    wechat = WechatBasic(conf=conf) #实例化 WechatBasic 官方接口类
+def wechat_main(request , wechat):
 
     body_text = request.body #提取body
+    #msg_signature = request.GET.get('msg_signature', None)
+    #timestamp = request.GET.get('timestamp', None)
+    #nonce = request.GET.get('nonce', None)
     try:
-        wechat.parse_data(body_text) #解析body
+        #wechat.parse_data(data = body_text , msg_signature=msg_signature, timestamp=timestamp, nonce=nonce) #解析body
+        wechat.parse_data(data = body_text)
     except Exception as ex:
         print(ex)
 
