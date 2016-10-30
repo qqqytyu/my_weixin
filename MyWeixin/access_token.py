@@ -24,7 +24,7 @@ while(True):
     f = open('AccessToken' , 'w' , encoding = 'utf-8')
     fcntl.flock(f , fcntl.LOCK_EX)
     f.write(access_token["access_token"]+'\n')
-    f.write(access_token["access_token_expires_at"])
+    f.write(str(access_token["access_token_expires_at"]))
     fcntl.flock(f , fcntl.LOCK_UN)
     #batch_get(access_token["access_token"] , 'image')
     f.close()
