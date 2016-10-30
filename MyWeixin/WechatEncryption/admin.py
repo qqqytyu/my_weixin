@@ -68,7 +68,7 @@ def wechat_main(request , wechat):
 #内容回复
 def reply_wechat_text(content , wechat):
     if(content == '功能'):
-        str = '1.计算器(例：计算 1 + 1) \n 2.学舌(例：学舌 学舌) \n 3.趣图'
+        str = '1.计算器(例：计算 1 + 1) \n 2.学舌(例：学舌 学舌) \n'
         return wechat.response_text(content=str)
     else:
         content = content.split(' ' , num = 1)
@@ -78,9 +78,9 @@ def reply_wechat_text(content , wechat):
             return wechat.response_text(content=str)
         elif(content[0] == '学舌'):
             return wechat.response_text(content=content[1])
-        elif(content[0] == '趣图'):
-            str = picture()
-            return wechat.response_image(media_id=str)
+        # elif(content[0] == '趣图'):
+        #     str = picture()
+        #     return wechat.response_image(media_id=str)
         else:
             str = '你再说什么，我听不懂...'
             return wechat.response_text(content=str)
@@ -98,9 +98,3 @@ def count(content):
             return int(content[0]) / int(content[2])
     except Exception as ex :
         return '我才一年级，复杂的计算我还不会 T.T'
-
-def picture():
-    i = random.random()
-    i = str(int(i*100))
-    str = r'picture/%s' % i
-    return str

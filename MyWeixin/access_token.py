@@ -1,12 +1,11 @@
 from wechat_sdk import WechatConf
 import time
 import fcntl
-
-import urllib
-import json
-import poster.encode
-from poster.streaminghttp import register_openers
-from basic import Basic
+# import urllib
+# import json
+# import poster.encode
+# from poster.streaminghttp import register_openers
+# from basic import Basic
 
 conf = WechatConf(
     token='weixin_langrensha',
@@ -24,16 +23,13 @@ while(True):
     f.write(access_token["access_token"]+'\n')
     f.write(access_token["access_token_expires_at"])
     fcntl.flock(f , fcntl.LOCK_UN)
-    batch_get(access_token["access_token"] , 'image')
+    #batch_get(access_token["access_token"] , 'image')
     f.close()
-
     time.sleep(7000)
 
-def batch_get(self, accessToken, mediaType, offset=0, count=10):
-    postUrl = ("https://api.weixin.qq.com/cgi-bin/material"
-               "/batchget_material?access_token=%s" % accessToken)
-    postData = ("{ \"type\": \"%s\", \"offset\": %d, \"count\": %d }"
-                % (mediaType, offset, count))
-    urlResp = urllib.request.urlopen(postUrl, postData)
-    print(urlResp.read())
+# def batch_get(self, accessToken, mediaType, offset=0, count=10):
+#     postUrl = "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=%s" % accessToken
+#     postData = '{ "type": "%s", "offset": %d, "count": %d }' % (mediaType, offset, count)
+#     urlResp = urllib.request.urlopen(postUrl, postData.encode('utf-8'))
+#     print(urlResp.read())
 
