@@ -71,10 +71,10 @@ def reply_wechat_text(content , wechat):
         str = '1.计算器(例：计算 1 + 1) \n 2.学舌(例：学舌 学舌) \n'
         return wechat.response_text(content=str)
     else:
-        content = content.split(' ' , num = 1)
+        content = content.split(' ' , 1)
         if(content[0] == '计算器'):
             num = count(content[1])
-            str = '%s = %s' % (content[1] , mum)
+            str = '%s = %s' % (content[1] , num)
             return wechat.response_text(content=str)
         elif(content[0] == '学舌'):
             return wechat.response_text(content=content[1])
