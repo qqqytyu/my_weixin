@@ -1,13 +1,13 @@
 from django.contrib import admin
-from lxml import etree
-from django.utils.encoding import smart_str
 import hashlib
 from wechat_sdk import WechatBasic
 from wechat_sdk.exceptions import ParseError
 from wechat_sdk.messages import TextMessage
 from wechat_sdk import WechatConf
+import random
 # Register your models here.
 
+#微信认证
 def checkSignature(request , wechat):
     # #获取signature timestamp nonce echostr 参数
     # signature = request.GET.get('signature', None)
@@ -36,6 +36,7 @@ def checkSignature(request , wechat):
     else:
         return True
 
+#消息判断
 def wechat_main(request , wechat):
 
     body_text = request.body #提取body
@@ -55,16 +56,52 @@ def wechat_main(request , wechat):
         xml = wechat.response_text(content=str)
     elif(type == 'unsubscribe'):
         pass    
+    elif(type == 'text'):
+        # source = wechat.message.source  # 对应于 XML 中的 FromUserName（目的）
+        content = wechat.message.content  # 对应于 XML 中的 Content（内容）
+        str = reply_wechat_text(content , wechat)
+        xml = wechat.response_text(content=str)
     else:
-        id = wechat.message.id  # 对应于 XML 中的 MsgId
-        target = wechat.message.target  # 对应于 XML 中的 ToUserName(原)
-        source = wechat.message.source  # 对应于 XML 中的 FromUserName（目的）
-        time = wechat.message.time  # 对应于 XML 中的 CreateTime
-        #content = wechat.message.content  # 对应于 XML 中的 Content（内容）
-        raw = wechat.message.raw  # 原始 XML 文本，方便进行其他分析
-        str = '''
-        来自 = %s
-        格式 = %s
-        ''' % (source , type)
-        xml = wechat.response_text(content = str)
+        str = '您发送的内容类型为：%s , 目前还未开通此类型的回复 T.T' % type
+        xml = wechat.response_text(content=str)
     return xml
+
+#内容回复
+def reply_wechat_text(content , wechat):
+    if(content == '功能'):
+        str = '1.计算器(例：计算 1 + 1) \n 2.学舌(例：学舌 学舌) \n 3.趣图'
+        return wechat.response_text(content=str)
+    else:
+        content = content.split(' ' , num = 1)
+        if(content[0] == '计算器'):
+            num = count(content[1])
+            str = '%s = %s' % (content[1] , mum)
+            return wechat.response_text(content=str)
+        elif(content[0] == '学舌'):
+            return wechat.response_text(content=content[1])
+        elif(content[0] == '趣图'):
+            str = picture()
+            return wechat.response_image(media_id=str)
+        else:
+            str = '你再说什么，我听不懂...'
+            return wechat.response_text(content=str)
+#计算
+def count(content):
+    content = content.split(' ')
+    try:
+        if(content[1] == '+'):
+            return int(content[0]) + int(content[2])
+        elif(content[1] == '-'):
+            return int(content[0]) - int(content[2])
+        elif(content[1] == '*'):
+            return int(content[0]) * int(content[2])
+        elif(content[1] == '/'):
+            return int(content[0]) / int(content[2])
+    except Exception as ex :
+        return '我才一年级，复杂的计算我还不会 T.T'
+
+def picture():
+    i = random.random()
+    i = str(int(i*100))
+    str = r'picture/%s' % i
+    return str
