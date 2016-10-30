@@ -1,4 +1,7 @@
 from wechat_sdk import WechatConf
+from wechat_sdk import WechatBasic
+from wechat_sdk.exceptions import ParseError
+from wechat_sdk.messages import TextMessage
 import time
 import fcntl
 # import urllib
