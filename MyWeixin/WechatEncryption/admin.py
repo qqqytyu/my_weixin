@@ -59,8 +59,7 @@ def wechat_main(request , wechat):
     elif(type == 'text'):
         # source = wechat.message.source  # 对应于 XML 中的 FromUserName（目的）
         content = wechat.message.content  # 对应于 XML 中的 Content（内容）
-        str = reply_wechat_text(content , wechat)
-        xml = wechat.response_text(content=str)
+        xml = reply_wechat_text(content , wechat)
     else:
         str = '您发送的内容类型为：%s , 目前还未开通此类型的回复 T.T' % type
         xml = wechat.response_text(content=str)
