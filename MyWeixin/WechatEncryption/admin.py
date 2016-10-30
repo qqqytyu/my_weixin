@@ -50,17 +50,17 @@ def wechat_main(request , wechat):
 
     xml = ''
     type = wechat.message.type  # 对应于 XML 中的 MsgType（类型）
-    if(type == 'event'):
-        Event = wechat.message.event
-        if(Event == 'subscribe'):
-            str = '欢迎关注，回复功能查看目前所功能'
-            xml = wechat.response_text(content=str)
+    if(type == 'subscribe'):
+        str = '欢迎关注，回复功能查看目前所功能'
+        xml = wechat.response_text(content=str)
+    elif(type == 'unsubscribe'):
+        pass    
     else:
         id = wechat.message.id  # 对应于 XML 中的 MsgId
         target = wechat.message.target  # 对应于 XML 中的 ToUserName(原)
         source = wechat.message.source  # 对应于 XML 中的 FromUserName（目的）
         time = wechat.message.time  # 对应于 XML 中的 CreateTime
-        content = wechat.message.content  # 对应于 XML 中的 Content（内容）
+        #content = wechat.message.content  # 对应于 XML 中的 Content（内容）
         raw = wechat.message.raw  # 原始 XML 文本，方便进行其他分析
         str = '''
         来自 = %s
