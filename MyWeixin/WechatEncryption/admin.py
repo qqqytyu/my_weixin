@@ -1,11 +1,63 @@
 from django.contrib import admin
-import hashlib
 from wechat_sdk import WechatBasic
 from wechat_sdk.exceptions import ParseError
 from wechat_sdk.messages import TextMessage
 from wechat_sdk import WechatConf
-import random
-# Register your models here.
+import hashlib ,random,json,urllib.request
+#天气图片字典
+weather_dict = {
+'晴':'http://files.heweather.com/cond_icon/100.png',
+'多云':'http://files.heweather.com/cond_icon/101.png',
+'少云':'http://files.heweather.com/cond_icon/102.png',
+'晴间多云':'http://files.heweather.com/cond_icon/103.png',
+'阴':'http://files.heweather.com/cond_icon/104.png',
+'有风':'http://files.heweather.com/cond_icon/200.png',
+'平静':'http://files.heweather.com/cond_icon/201.png',
+'微风':'http://files.heweather.com/cond_icon/202.png',
+'和风':'http://files.heweather.com/cond_icon/203.png',
+'清风':'http://files.heweather.com/cond_icon/204.png',
+'强风/劲风':'http://files.heweather.com/cond_icon/205.png',
+'疾风':'http://files.heweather.com/cond_icon/206.png',
+'大风':'http://files.heweather.com/cond_icon/207.png',
+'烈风':'http://files.heweather.com/cond_icon/208.png',
+'风暴':'http://files.heweather.com/cond_icon/209.png',
+'狂爆风':'http://files.heweather.com/cond_icon/210.png',
+'飓风':'http://files.heweather.com/cond_icon/211.png',
+'龙卷风':'http://files.heweather.com/cond_icon/212.png',
+'热带风暴':'http://files.heweather.com/cond_icon/213.png',
+'阵雨':'http://files.heweather.com/cond_icon/300.png',
+'强阵雨':'http://files.heweather.com/cond_icon/301.png',
+'雷阵雨':'http://files.heweather.com/cond_icon/302.png',
+'强雷阵雨':'http://files.heweather.com/cond_icon/303.png',
+'雷阵雨伴有冰雹':'http://files.heweather.com/cond_icon/304.png',
+'小雨':'http://files.heweather.com/cond_icon/305.png',
+'中雨':'http://files.heweather.com/cond_icon/306.png',
+'大雨':'http://files.heweather.com/cond_icon/307.png',
+'极端降雨':'http://files.heweather.com/cond_icon/308.png',
+'毛毛雨/细雨':'http://files.heweather.com/cond_icon/309.png',
+'暴雨':'http://files.heweather.com/cond_icon/310.png',
+'大暴雨':'http://files.heweather.com/cond_icon/311.png',
+'特大暴雨':'http://files.heweather.com/cond_icon/312.png',
+'冻雨':'http://files.heweather.com/cond_icon/313.png',
+'小雪':'http://files.heweather.com/cond_icon/400.png',
+'中雪':'http://files.heweather.com/cond_icon/401.png',
+'大雪':'http://files.heweather.com/cond_icon/402.png',
+'暴雪':'http://files.heweather.com/cond_icon/403.png',
+'雨夹雪':'http://files.heweather.com/cond_icon/404.png',
+'雨雪天气':'http://files.heweather.com/cond_icon/405.png',
+'阵雨夹雪':'http://files.heweather.com/cond_icon/406.png',
+'阵雪':'http://files.heweather.com/cond_icon/407.png',
+'薄雾':'http://files.heweather.com/cond_icon/500.png',
+'雾':'http://files.heweather.com/cond_icon/501.png',
+'霾':'http://files.heweather.com/cond_icon/502.png',
+'扬沙':'http://files.heweather.com/cond_icon/503.png',
+'浮尘':'http://files.heweather.com/cond_icon/504.png',
+'沙尘暴':'http://files.heweather.com/cond_icon/507.png',
+'强沙尘暴':'http://files.heweather.com/cond_icon/508.png',
+'热':'http://files.heweather.com/cond_icon/900.png',
+'冷':'http://files.heweather.com/cond_icon/901.png',
+'未知':'http://files.heweather.com/cond_icon/999.pn'
+}
 
 #微信认证
 def checkSignature(request , wechat):
@@ -40,11 +92,7 @@ def checkSignature(request , wechat):
 def wechat_main(request , wechat):
 
     body_text = request.body #提取body
-    #msg_signature = request.GET.get('msg_signature', None)
-    #timestamp = request.GET.get('timestamp', None)
-    #nonce = request.GET.get('nonce', None)
     try:
-        #wechat.parse_data(data = body_text , msg_signature=msg_signature, timestamp=timestamp, nonce=nonce) #解析body
         wechat.parse_data(data = body_text)
     except Exception as ex:
         print(ex)
@@ -57,7 +105,6 @@ def wechat_main(request , wechat):
     elif(type == 'unsubscribe'):
         pass    
     elif(type == 'text'):
-        # source = wechat.message.source  # 对应于 XML 中的 FromUserName（目的）
         content = wechat.message.content  # 对应于 XML 中的 Content（内容）
         xml = reply_wechat_text(content , wechat)
     else:
@@ -67,34 +114,34 @@ def wechat_main(request , wechat):
 
 #内容回复
 def reply_wechat_text(content , wechat):
-    if(content == '功能'):
-        str = '1.计算器(例：计算 1 + 1) \n 2.学舌(例：学舌 学舌) \n'
+    con = content.split(' ')
+    if(con[0] == '功能'):
+        str = '1.基本信息\n2.天气预报'
         return wechat.response_text(content=str)
-    else:
-        content = content.split(' ' , 1)
-        if(content[0] == '计算'):
-            num = count(content[1])
-            str = '%s = %s' % (content[1] , num)
-            return wechat.response_text(content=str)
-        elif(content[0] == '学舌'):
-            return wechat.response_text(content=content[1])
-        # elif(content[0] == '趣图'):
-        #     str = picture()
-        #     return wechat.response_image(media_id=str)
-        else:
-            str = '你再说什么，我听不懂...'
-            return wechat.response_text(content=str)
-#计算
-def count(content):
-    content = content.split(' ')
-    try:
-        if(content[1] == '+'):
-            return int(content[0]) + int(content[2])
-        elif(content[1] == '-'):
-            return int(content[0]) - int(content[2])
-        elif(content[1] == '*'):
-            return int(content[0]) * int(content[2])
-        elif(content[1] == '/'):
-            return int(content[0]) / int(content[2])
-    except Exception as ex :
-        return '我才一年级，复杂的计算我还不会 T.T'
+    elif(con[0] == '基本信息'):
+        id = wechat.message.id  # 对应于 XML 中的 MsgId
+        target = wechat.message.target  # 对应于 XML 中的 ToUserName
+        source = wechat.message.source  # 对应于 XML 中的 FromUserName
+        time = wechat.message.time  # 对应于 XML 中的 CreateTime
+        type = wechat.message.type  # 对应于 XML 中的 MsgType
+        str = "id = %s\nToUserName = %s\nFromUserName = %s\nCreateTime = %s\nMsgType = %s\n" % (id,target,source,time,type)
+        return wechat.response_text(content=str)
+    elif(con[0] == '天气预报'):
+        str = "请输入：天气 地点"
+        return wechat.response_text(content=str)
+    elif(con[0] == '天气'):
+        return BackWeather(con[1] , wechat)
+
+def BackWeather(con , wechat):
+    url = "https://free-api.heweather.com/v5/weather?city=%s&key=57d01b5cee324a80b947f0f994dcabc0" % con
+    date = (urllib.request.urlopen(url)).decode('utf-8')
+    jsonDate = json.loads(date)
+    xml = wechat.response_news([
+        {
+            'title': u'%s(实时)天气情况' % jsonDate["HeWeather5"][0]["basic"]["update"]["loc"],
+            'description': u'%s' % jsonDate["HeWeather5"][0]["now"]["cond"]["text"],
+            'picurl': u'%s' % weather_dict[jsonDate["HeWeather5"][0]["now"]["cond"]["text"]],
+            'url': u'http://www.weather.com.cn/weather/101030100.shtml',
+        }
+    ])
+    return xml
