@@ -133,14 +133,16 @@ def reply_wechat_text(content , wechat):
         return BackWeather(con[1] , wechat)
 
 def BackWeather(con , wechat):
-    url = "https://free-api.heweather.com/v5/weather?city=%s&key=57d01b5cee324a80b947f0f994dcabc0" % con
-    date = (urllib.request.urlopen(url)).decode('utf-8')
+    #url = "https://free-api.heweather.com/v5/weather?city=%s&key=57d01b5cee324a80b947f0f994dcabc0" % con.encode('gbk')
+    url = "https://free-api.heweather.com/v5/weather?city=%E5%8C%97%E4%BA%AC&key=57d01b5cee324a80b947f0f994dcabc0"
+    date = ((urllib.request.urlopen(url)).read()).decode('utf-8')
     jsonDate = json.loads(date)
+    print(jsonDate)
     xml = wechat.response_news([
         {
             'title': u'%s(实时)天气情况' % jsonDate["HeWeather5"][0]["basic"]["update"]["loc"],
-            'description': u'%s' % jsonDate["HeWeather5"][0]["now"]["cond"]["text"],
-            'picurl': u'%s' % weather_dict[jsonDate["HeWeather5"][0]["now"]["cond"]["text"]],
+            'description': u'%s' % jsonDate["HeWeather5"][0]["now"]["cond"]["txt"],
+            'picurl': u'%s' % weather_dict[jsonDate["HeWeather5"][0]["now"]["cond"]["txt"]],
             'url': u'http://www.weather.com.cn/weather/101030100.shtml',
         }
     ])
