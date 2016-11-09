@@ -2686,18 +2686,34 @@ def reply_wechat_text(content , wechat):
         return wechat.response_text(content=str)
     elif(con[0] == '天气'):
         return BackWeather(con[1] , wechat)
+    else:
+        return wechat.response_text(content="听不懂你再说什么T.T")
 
+#返回天气信息
 def BackWeather(con , wechat):
     url = "https://free-api.heweather.com/v5/weather?city=%s&key=57d01b5cee324a80b947f0f994dcabc0" % china_city_list[con][0]
     date = ((urllib.request.urlopen(url)).read()).decode('utf-8')
     jsonDate = json.loads(date)
-    print(jsonDate)
+    #print(jsonDate)
     xml = wechat.response_news([
         {
             'title': u'%s %s天气情况(实时)' % (jsonDate["HeWeather5"][0]["basic"]["update"]["loc"],con),
-            'description': u'%s 体感温度:%s' % (jsonDate["HeWeather5"][0]["now"]["cond"]["txt"],jsonDate["HeWeather5"][0]["now"]["fl"]),
+            'description': u'%s 体感温度:%s' % (jsonDate["HeWeather5"][0]["now"]["cond"]["txt"],
+                                            jsonDate["HeWeather5"][0]["now"]["fl"]),
             'picurl': u'%s' % weather_dict[jsonDate["HeWeather5"][0]["now"]["cond"]["txt"]][1],
-            'url': u'http://www.weather.com.cn/weather/%s.shtml' % china_city_list[con][0][2:],
+            'url': u'http://www.weather.com.cn/weather/%s.shtml' % china_city_list[con][0][2:]
+        },{
+        'title': u'%s %s 最高温度:%s 最低温度:%s' % (jsonDate["HeWeather5"][0]["daily_forecast"][1]["date"] ,
+                                             jsonDate["HeWeather5"][0]["daily_forecast"][1]["cond"]["txt_d"],
+                                             jsonDate["HeWeather5"][0]["daily_forecast"][1]["tmp"]["max"],
+                                             jsonDate["HeWeather5"][0]["daily_forecast"][1]["tmp"]["min"]),
+        'url': u'http://www.weather.com.cn/weather/%s.shtml' % china_city_list[con][0][2:]
+        },{
+        'title': u'%s %s 最高温度:%s 最低温度:%s' % (jsonDate["HeWeather5"][0]["daily_forecast"][2]["date"] ,
+                                             jsonDate["HeWeather5"][0]["daily_forecast"][2]["cond"]["txt_d"],
+                                             jsonDate["HeWeather5"][0]["daily_forecast"][2]["tmp"]["max"],
+                                             jsonDate["HeWeather5"][0]["daily_forecast"][2]["tmp"]["min"]),
+        'url': u'http://www.weather.com.cn/weather/%s.shtml' % china_city_list[con][0][2:]
         }
     ])
     return xml
