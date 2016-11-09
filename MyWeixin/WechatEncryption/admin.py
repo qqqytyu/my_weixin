@@ -2694,8 +2694,8 @@ def BackWeather(con , wechat):
     print(jsonDate)
     xml = wechat.response_news([
         {
-            'title': u'%s(实时)天气情况' % jsonDate["HeWeather5"][0]["basic"]["update"]["loc"],
-            'description': u'%s' % jsonDate["HeWeather5"][0]["now"]["cond"]["txt"],
+            'title': u'%s %s天气情况(实时)' % (jsonDate["HeWeather5"][0]["basic"]["update"]["loc"],con),
+            'description': u'%s 体感温度:%s' % (jsonDate["HeWeather5"][0]["now"]["cond"]["txt"],jsonDate["HeWeather5"][0]["now"]["fl"]),
             'picurl': u'%s' % weather_dict[jsonDate["HeWeather5"][0]["now"]["cond"]["txt"]][1],
             'url': u'http://www.weather.com.cn/weather/%s.shtml' % china_city_list[con][0][2:],
         }
