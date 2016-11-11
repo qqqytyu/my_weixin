@@ -2659,7 +2659,8 @@ def wechat_main(request , wechat):
         str = '%s 欢迎关注，回复功能查看目前所功能' % name
         xml = wechat.response_text(content=str)
     elif(type == 'unsubscribe'):
-        unsubscribe_sql(wechat)
+        #unsubscribe_sql(wechat)
+        pass
     elif(type == 'text'):
         content = wechat.message.content  # 对应于 XML 中的 Content（内容）
         xml = reply_wechat_text(content , wechat)
@@ -2740,9 +2741,10 @@ def subscribe_sql(wechat):
     AccessToken = f.readlines()
     fcntl.flock(f, fcntl.LOCK_UN)
     f.close()
-    print("\n\n\n%s\n\n\n" % opne_id)
-    url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN" % (AccessToken[0],open_id)
-    date = ((urllib.request.urlopen(url)).read()).decode('utf-8')
+    url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN" % (AccessToken[0][:-1],open_id)
+    date = urllib.request.urlopen(url)
+    date = date.read()
+    date = date.decode('utf-8')
     jsonDate = json.loads(date)
     name = jsonDate["nickname"]
     sex = ""
@@ -2752,8 +2754,8 @@ def subscribe_sql(wechat):
         sex = '女'
     else:
         sex = '未知'
-    sql = 'insert into weixin_user("open_id","name","sex") values("%s","%s","%s")' % (open_id,name,sex)
-    send_sql(sql)
+    sql = "insert into weixin_user(open_id,name,sex)values('%s','%s','%s')" % (open_id,name,sex)
+    send_sql(sql.encode('utf-8'))
     return name
 
 #删除用户

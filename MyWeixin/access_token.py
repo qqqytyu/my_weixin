@@ -22,7 +22,7 @@ while(True):
     fcntl.flock(f , fcntl.LOCK_UN)
     #batch_get(access_token["access_token"] , 'image')
     f.close()
-    time.sleep(7000)
+    time.sleep(3500)
 
 # def batch_get(self, accessToken, mediaType, offset=0, count=10):
 #     postUrl = "https://api.weixin.qq.com/cgi-bin/material/batchget_material?access_token=%s" % accessToken
