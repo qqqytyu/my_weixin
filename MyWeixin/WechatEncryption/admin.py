@@ -3,7 +3,7 @@ from wechat_sdk import WechatBasic
 from wechat_sdk.exceptions import ParseError
 from wechat_sdk.messages import TextMessage
 from wechat_sdk import WechatConf
-import hashlib ,random,json,urllib.request,MySQLdb
+import hashlib ,random,json,urllib.request,MySQLdb,fcntl
 #天气图片字典
 weather_dict = {
 '晴':['100','http://files.heweather.com/cond_icon/100.png'],
