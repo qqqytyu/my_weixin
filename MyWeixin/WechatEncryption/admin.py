@@ -2659,8 +2659,7 @@ def wechat_main(request , wechat):
         str = '%s 欢迎关注，回复功能查看目前所功能' % name
         xml = wechat.response_text(content=str)
     elif(type == 'unsubscribe'):
-        #unsubscribe_sql(wechat)
-        pass
+        unsubscribe_sql(wechat)
     elif(type == 'text'):
         content = wechat.message.content  # 对应于 XML 中的 Content（内容）
         xml = reply_wechat_text(content , wechat)
@@ -2727,6 +2726,7 @@ def send_sql(sql):
         user='root',
         passwd='L&j&X7596',
         db='my_weixin_db',
+        charset='utf8',
     )
     cur = conn.cursor()#创建游标
     cur.execute(sql)#写入sql语句
@@ -2760,7 +2760,7 @@ def subscribe_sql(wechat):
 
 #删除用户
 def unsubscribe_sql(wechat):
-    sql = "DELETE FROM weixin_user WHERE open_id=%s" % wechat.message.source
+    sql = "DELETE FROM weixin_user WHERE open_id='%s'" % wechat.message.source
     send_sql(sql)
 
 
