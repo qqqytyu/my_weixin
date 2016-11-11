@@ -2740,6 +2740,7 @@ def subscribe_sql(wechat):
     AccessToken = f.readlines()
     fcntl.flock(f, fcntl.LOCK_UN)
     f.close()
+    print("\n\n\n%s\n\n\n" % opne_id)
     url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN" % (AccessToken[0],open_id)
     date = ((urllib.request.urlopen(url)).read()).decode('utf-8')
     jsonDate = json.loads(date)
