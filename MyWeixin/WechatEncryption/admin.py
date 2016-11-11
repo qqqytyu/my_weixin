@@ -3,7 +3,7 @@ from wechat_sdk import WechatBasic
 from wechat_sdk.exceptions import ParseError
 from wechat_sdk.messages import TextMessage
 from wechat_sdk import WechatConf
-import hashlib ,random,json,urllib.request
+import hashlib ,random,json,urllib.request,MySQLdb
 #天气图片字典
 weather_dict = {
 '晴':['100','http://files.heweather.com/cond_icon/100.png'],
@@ -2655,10 +2655,11 @@ def wechat_main(request , wechat):
     xml = ''
     type = wechat.message.type  # 对应于 XML 中的 MsgType（类型）
     if(type == 'subscribe'):
-        str = '欢迎关注，回复功能查看目前所功能'
+        name = subscribe_sql(wechat)
+        str = '%s 欢迎关注，回复功能查看目前所功能' % name
         xml = wechat.response_text(content=str)
     elif(type == 'unsubscribe'):
-        pass    
+        unsubscribe_sql(wechat)
     elif(type == 'text'):
         content = wechat.message.content  # 对应于 XML 中的 Content（内容）
         xml = reply_wechat_text(content , wechat)
@@ -2715,3 +2716,48 @@ def BackWeather(con , wechat):
         }
     ])
     return xml
+
+#发送sql语句
+def send_sql(sql):
+    #创建数据库的连接
+    conn = MySQLdb.connect(
+        host='123.207.137.201',
+        port=3306,
+        user='root',
+        passwd='L&j&X7596',
+        db='my_weixin_db',
+    )
+    cur = conn.cursor()#创建游标
+    cur.execute(sql)#写入sql语句
+    cur.close()#关闭游标
+    conn.commit()#提交事务
+    conn.close()#关闭数据库
+#添加用户
+def subscribe_sql(wechat):
+    open_id = wechat.message.source
+    f = open('AccessToken', 'r', encoding='utf-8')
+    fcntl.flock(f, fcntl.LOCK_EX)  # 加锁
+    AccessToken = f.readlines()
+    fcntl.flock(f, fcntl.LOCK_UN)
+    f.close()
+    url = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN" % (AccessToken[0],open_id)
+    date = ((urllib.request.urlopen(url)).read()).decode('utf-8')
+    jsonDate = json.loads(date)
+    name = jsonDate["nickname"]
+    sex = ""
+    if(jsonDate["sex"] == 1):
+        sex = '男'
+    elif(jsonDate["sex"] == 2):
+        sex = '女'
+    else:
+        sex = '未知'
+    sql = 'insert into weixin_user("open_id","name","sex") values("%s","%s","%s")' % (open_id,name,sex)
+    send_sql(sql)
+    return name
+
+#删除用户
+def unsubscribe_sql(wechat):
+    sql = "DELETE FROM weixin_user WHERE open_id=%s" % wechat.message.source
+    send_sql(sql)
+
+
